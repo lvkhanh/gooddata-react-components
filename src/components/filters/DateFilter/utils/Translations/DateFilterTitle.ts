@@ -1,28 +1,21 @@
 // (C) 2019 GoodData Corporation
+import moment = require("moment");
 import capitalize = require("lodash/capitalize");
 import isEqual = require("lodash/isEqual");
 import { ExtendedDateFilters, Localization } from "@gooddata/typings";
 import IntlStore from "../../../../../helpers/IntlStore";
 import { granularityIntlCodes } from "../../constants/i18n";
-import { IMessageTranslator, IDateTranslator, IDateAndMessageTranslator } from "./Translators";
+import { IMessageTranslator, IDateAndMessageTranslator } from "./Translators";
 import { convertPlatformDateStringToDate } from "../DateConversions";
+import { absoluteDateFormat } from "../../../../../constants/Platform";
 
-const formatAbsoluteDate = (date: Date | string, translator: IDateTranslator) =>
-    translator.formatDate(date, {
-        year: "numeric",
-        month: "numeric",
-        day: "numeric",
-    });
+const formatAbsoluteDate = (date: Date) => moment(date).format(absoluteDateFormat);
 
-const formatAbsoluteDateRange = (
-    from: Date | string,
-    to: Date | string,
-    translator: IDateTranslator,
-): string => {
+const formatAbsoluteDateRange = (from: Date | string, to: Date | string): string => {
     const fromDate = convertPlatformDateStringToDate(from);
     const toDate = convertPlatformDateStringToDate(to);
-    const fromTitle = formatAbsoluteDate(fromDate, translator);
-    const toTitle = formatAbsoluteDate(toDate, translator);
+    const fromTitle = formatAbsoluteDate(fromDate);
+    const toTitle = formatAbsoluteDate(toDate);
 
     if (isEqual(fromTitle, toTitle)) {
         return fromTitle;
@@ -128,15 +121,12 @@ const formatRelativeDateRange = (
 const getAllTimeFilterRepresentation = (translator: IMessageTranslator): string =>
     translator.formatMessage({ id: "filters.allTime.title" });
 
-const getAbsoluteFormFilterRepresentation = (
-    filter: ExtendedDateFilters.IAbsoluteDateFilterForm,
-    translator: IDateAndMessageTranslator,
-): string => (filter.from && filter.to ? formatAbsoluteDateRange(filter.from, filter.to, translator) : "");
+const getAbsoluteFormFilterRepresentation = (filter: ExtendedDateFilters.IAbsoluteDateFilterForm): string =>
+    filter.from && filter.to ? formatAbsoluteDateRange(filter.from, filter.to) : "";
 
 const getAbsolutePresetFilterRepresentation = (
     filter: ExtendedDateFilters.IAbsoluteDateFilterPreset,
-    translator: IDateAndMessageTranslator,
-): string => formatAbsoluteDateRange(filter.from, filter.to, translator);
+): string => formatAbsoluteDateRange(filter.from, filter.to);
 
 const getRelativeFormFilterRepresentation = (
     filter: ExtendedDateFilters.IRelativeDateFilterForm,
@@ -210,9 +200,9 @@ const getDateFilterRepresentationUsingTranslator = (
     translator: IDateAndMessageTranslator,
 ): string => {
     if (ExtendedDateFilters.isAbsoluteDateFilterForm(filter)) {
-        return getAbsoluteFormFilterRepresentation(filter, translator);
+        return getAbsoluteFormFilterRepresentation(filter);
     } else if (ExtendedDateFilters.isAbsoluteDateFilterPreset(filter)) {
-        return getAbsolutePresetFilterRepresentation(filter, translator);
+        return getAbsolutePresetFilterRepresentation(filter);
     } else if (ExtendedDateFilters.isAllTimeDateFilter(filter)) {
         return getAllTimeFilterRepresentation(translator);
     } else if (ExtendedDateFilters.isRelativeDateFilterForm(filter)) {
