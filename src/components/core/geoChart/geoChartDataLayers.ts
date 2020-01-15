@@ -2,6 +2,7 @@
 import uniqBy = require("lodash/uniqBy");
 import { Execution } from "@gooddata/typings";
 import mapboxgl from "mapbox-gl";
+
 import { DEFAULT_COLORS, getLighterColor } from "../../visualizations/utils/color";
 import {
     DEFAULT_PUSHPIN_COLOR_SCALE,
@@ -18,6 +19,7 @@ import {
     PUSHPIN_STYLE_CIRCLE_STROKE_COLOR,
 } from "../../../constants/geoChart";
 import { getHeaderItemName } from "../../../helpers/executionResultHelper";
+import { getGeoAttributeHeaderItems } from "../../../helpers/geoChart";
 import { stringToFloat } from "../../../helpers/utils";
 import { IGeoDataIndex } from "../../../interfaces/GeoChart";
 
@@ -25,7 +27,7 @@ function createPushpinBorderOptions(
     executionResult: Execution.IExecutionResult,
     geoDataIndex: IGeoDataIndex,
 ): mapboxgl.Expression | string {
-    const { color, segmentBy, size } = geoDataIndex;
+    const { color, segmentBy } = geoDataIndex;
     const data = executionResult.data as Execution.DataValue[][];
     const colorData = (data[color] || []).map(stringToFloat);
 
@@ -37,10 +39,7 @@ function createPushpinBorderOptions(
         return DEFAULT_COLORS[0];
     }
 
-    const hasColorMeasure = color !== undefined;
-    const hasSizeMeasure = size !== undefined;
-    const attrHeaderItemIndex = hasColorMeasure || hasSizeMeasure ? 1 : 0;
-    const attributeHeaderItems = executionResult.headerItems[attrHeaderItemIndex];
+    const attributeHeaderItems = getGeoAttributeHeaderItems(executionResult, geoDataIndex);
 
     const segmentByData = uniqBy(attributeHeaderItems[segmentBy], getHeaderItemName);
     if (segmentByData.length < 2) {
@@ -103,12 +102,8 @@ function createColorSegmentByOptions(
     maxValue: number,
     stepValue: number,
 ): mapboxgl.Expression | string {
-    const { color, segmentBy, size } = geoDataIndex;
-
-    const hasColorMeasure = color !== undefined;
-    const hasSizeMeasure = size !== undefined;
-    const attrHeaderItemIndex = hasColorMeasure || hasSizeMeasure ? 1 : 0;
-    const attributeHeaderItems = executionResult.headerItems[attrHeaderItemIndex];
+    const { segmentBy } = geoDataIndex;
+    const attributeHeaderItems = getGeoAttributeHeaderItems(executionResult, geoDataIndex);
 
     const segmentByData = uniqBy(attributeHeaderItems[segmentBy], getHeaderItemName);
 

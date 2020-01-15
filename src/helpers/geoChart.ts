@@ -1,5 +1,5 @@
 // (C) 2019-2020 GoodData Corporation
-import { VisualizationObject } from "@gooddata/typings";
+import { Execution, VisualizationObject } from "@gooddata/typings";
 import { IGeoDataIndex } from "../interfaces/GeoChart";
 import { COLOR, LOCATION, SEGMENT_BY, SIZE, TOOLTIP_TEXT } from "../constants/bucketNames";
 
@@ -68,4 +68,31 @@ export function getGeoDataIndex(buckets: VisualizationObject.IBucket[]): IGeoDat
     }
 
     return geoDataIndex;
+}
+
+export function getGeoAttributeHeaderItems(
+    executionResult: Execution.IExecutionResult,
+    geoDataIndex: IGeoDataIndex,
+): Execution.IResultHeaderItem[][] {
+    const { color, size } = geoDataIndex;
+
+    const hasColorMeasure = color !== undefined;
+    const hasSizeMeasure = size !== undefined;
+    const attrHeaderItemIndex = hasColorMeasure || hasSizeMeasure ? 1 : 0;
+    const attributeHeaderItems = executionResult.headerItems[attrHeaderItemIndex];
+
+    return attributeHeaderItems;
+}
+
+export function isDataOfReasonableSize(
+    executionResult: Execution.IExecutionResult,
+    geoDataIndex: IGeoDataIndex,
+    limit: number,
+): boolean {
+    const { location } = geoDataIndex;
+
+    const attributeHeaderItems = getGeoAttributeHeaderItems(executionResult, geoDataIndex);
+    const locationData = location !== undefined ? attributeHeaderItems[location] : [];
+
+    return locationData.length > limit;
 }

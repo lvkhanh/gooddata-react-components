@@ -2,18 +2,44 @@
 import * as React from "react";
 import { mount, ReactWrapper } from "enzyme";
 import { testUtils } from "@gooddata/js-utils";
+import { VisualizationObject } from "@gooddata/typings";
 
 import { GeoChartInner, IGeoChartInnerProps } from "../GeoChart";
 import { createIntlMock } from "../../visualizations/utils/intlUtils";
+import * as BucketNames from "../../../constants/bucketNames";
+import { getExecutionResult } from "../../../../stories/data/geoChart";
 
 const intl = createIntlMock();
+const mdObject: VisualizationObject.IVisualizationObjectContent = {
+    buckets: [
+        {
+            localIdentifier: BucketNames.LOCATION,
+            items: [
+                {
+                    visualizationAttribute: {
+                        localIdentifier: "a1",
+                        displayForm: {
+                            uri: "/gdc/md/project/obj/1027",
+                        },
+                    },
+                },
+            ],
+        },
+    ],
+    visualizationClass: {
+        uri: "/gdc/md/mockproject/obj/column",
+    },
+};
 
 describe("GeoChart", () => {
     function renderComponent(customProps: Partial<IGeoChartInnerProps> = {}): ReactWrapper {
         const defaultProps: Partial<IGeoChartInnerProps> = {
+            config: {
+                mdObject,
+            },
             execution: {
                 executionResponse: undefined,
-                executionResult: undefined,
+                executionResult: getExecutionResult(true),
             },
             intl,
         };
@@ -37,5 +63,17 @@ describe("GeoChart", () => {
         const legendRenderer = jest.fn().mockReturnValue(<div />);
         renderComponent({ legendRenderer });
         expect(legendRenderer).toHaveBeenCalledTimes(1);
+    });
+
+    it("should call onDataTooLarge", () => {
+        const onDataTooLarge = jest.fn();
+        renderComponent({
+            config: {
+                limit: 20,
+                mdObject,
+            },
+            onDataTooLarge,
+        });
+        expect(onDataTooLarge).toHaveBeenCalledTimes(1);
     });
 });

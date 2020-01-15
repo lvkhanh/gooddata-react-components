@@ -1,5 +1,6 @@
 // (C) 2019-2020 GoodData Corporation
 import { Execution } from "@gooddata/typings";
+
 import {
     DEFAULT_PUSHPIN_COLOR_VALUE_KEY,
     DEFAULT_PUSHPIN_SEGMENT_BY_VALUE_KEY,
@@ -7,6 +8,7 @@ import {
     DEFAULT_PUSHPIN_SIZE_VALUE_KEY,
 } from "../../../constants/geoChart";
 import { getHeaderItemName } from "../../../helpers/executionResultHelper";
+import { getGeoAttributeHeaderItems } from "../../../helpers/geoChart";
 import { stringToFloat } from "../../../helpers/utils";
 import { IGeoDataIndex } from "../../../interfaces/GeoChart";
 
@@ -46,8 +48,7 @@ function transformPushpinDataSource(
         sizeData = data[size];
     }
 
-    const attrHeaderItemIndex = hasColorMeasure || hasSizeMeasure ? 1 : 0;
-    const attributeHeaderItems = executionResult.headerItems[attrHeaderItemIndex];
+    const attributeHeaderItems = getGeoAttributeHeaderItems(executionResult, geoDataIndex);
 
     const locationData = location !== undefined ? attributeHeaderItems[location] : [];
     const locationNameData = tooltipText !== undefined ? attributeHeaderItems[tooltipText] : [];

@@ -1,7 +1,9 @@
 // (C) 2019-2020 GoodData Corporation
-import { VisualizationObject } from "@gooddata/typings";
+import { Execution, VisualizationObject } from "@gooddata/typings";
 import { COLOR, LOCATION, SEGMENT_BY, SIZE, TOOLTIP_TEXT } from "../../constants/bucketNames";
-import { getGeoDataIndex } from "../geoChart";
+import { getGeoAttributeHeaderItems, getGeoDataIndex, isDataOfReasonableSize } from "../geoChart";
+import { IGeoDataIndex } from "../../interfaces/GeoChart";
+import { getExecutionResult } from "../../../stories/data/geoChart";
 
 describe("geoChart", () => {
     const LOCATION_ITEM: VisualizationObject.IBucket = {
@@ -113,5 +115,51 @@ describe("geoChart", () => {
             segmentBy: 0,
             color: 0,
         });
+    });
+
+    describe("getGeoAttributeHeaderItems", () => {
+        it("should return attributeHeaderItems without color and size", () => {
+            const geoDataIndex: IGeoDataIndex = {};
+            const attributeHeaderItems: Execution.IResultHeaderItem[][] = getGeoAttributeHeaderItems(
+                getExecutionResult(),
+                geoDataIndex,
+            );
+            expect(attributeHeaderItems).toEqual([]);
+        });
+
+        it("should return attributeHeaderItems with color and size", () => {
+            const geoDataIndex: IGeoDataIndex = {
+                color: 0,
+                location: 0,
+                segmentBy: 1,
+                size: 1,
+                tooltipText: 2,
+            };
+            const attributeHeaderItems: Execution.IResultHeaderItem[][] = getGeoAttributeHeaderItems(
+                getExecutionResult(true, true, true, true, true),
+                geoDataIndex,
+            );
+            expect(attributeHeaderItems[geoDataIndex.location][0]).toEqual({
+                attributeHeaderItem: {
+                    name: "44.500000;-89.500000",
+                    uri: "/gdc/md/projectId/obj/694/elements?id=1808",
+                },
+            });
+        });
+    });
+
+    describe("isDataOfReasonableSize", () => {
+        it.each([[false, 100], [true, 30]])(
+            "should isDataOfReasonableSize return %s",
+            (expectedValue: boolean, limit: number) => {
+                const geoDataIndex: IGeoDataIndex = { location: 0 };
+                const isDataTooLarge: boolean = isDataOfReasonableSize(
+                    getExecutionResult(true),
+                    geoDataIndex,
+                    limit,
+                );
+                expect(isDataTooLarge).toEqual(expectedValue);
+            },
+        );
     });
 });
