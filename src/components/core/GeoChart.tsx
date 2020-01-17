@@ -14,10 +14,9 @@ import GeoChartLegendRenderer, { IChartLegendProps } from "./geoChart/GeoChartLe
 import GeoChartRenderer, { IGeoChartRendererProps } from "./geoChart/GeoChartRenderer";
 
 import { IDataSourceProviderInjectedProps } from "../afm/DataSourceProvider";
-import { IGeoConfig } from "../../interfaces/GeoChart";
 import { DEFAULT_DATA_POINTS_LIMIT } from "../../constants/geoChart";
-import { IGeoConfig, IGeoDataIndex } from "../../interfaces/GeoChart";
-import { getGeoDataIndex, isDataOfReasonableSize } from "../../helpers/geoChart";
+import { IGeoConfig, IGeoData } from "../../interfaces/GeoChart";
+import { isDataOfReasonableSize, getGeoData } from "../../helpers/geoChart";
 
 export function renderChart(props: IGeoChartRendererProps): React.ReactElement {
     return <GeoChartRenderer {...props} />;
@@ -94,15 +93,9 @@ export class GeoChartInner extends BaseVisualization<IGeoChartInnerProps, {}> {
         if (!execution) {
             return;
         }
-
-        const geoDataIndex: IGeoDataIndex = getGeoDataIndex(buckets);
-        if (
-            isDataOfReasonableSize(
-                execution.executionResult,
-                geoDataIndex,
-                limit || DEFAULT_DATA_POINTS_LIMIT,
-            )
-        ) {
+        const { executionResponse, executionResult } = execution;
+        const geoData: IGeoData = getGeoData(buckets, executionResponse.dimensions);
+        if (isDataOfReasonableSize(executionResult, geoData, limit || DEFAULT_DATA_POINTS_LIMIT)) {
             // always force onDataTooLarge error handling
             invariant(onDataTooLarge, "GeoChart's onDataTooLarge callback is missing.");
             return onDataTooLarge();

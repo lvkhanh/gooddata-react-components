@@ -62,9 +62,9 @@ export function getGeoData(
 
 export function getGeoAttributeHeaderItems(
     executionResult: Execution.IExecutionResult,
-    geoDataIndex: IGeoDataIndex,
+    geoData: IGeoData,
 ): Execution.IResultHeaderItem[][] {
-    const { color, size } = geoDataIndex;
+    const { color, size } = geoData;
 
     const hasColorMeasure = color !== undefined;
     const hasSizeMeasure = size !== undefined;
@@ -76,13 +76,13 @@ export function getGeoAttributeHeaderItems(
 
 export function isDataOfReasonableSize(
     executionResult: Execution.IExecutionResult,
-    geoDataIndex: IGeoDataIndex,
+    geoData: IGeoData,
     limit: number,
 ): boolean {
-    const { location } = geoDataIndex;
+    const { location } = geoData;
 
-    const attributeHeaderItems = getGeoAttributeHeaderItems(executionResult, geoDataIndex);
-    const locationData = location !== undefined ? attributeHeaderItems[location] : [];
+    const attributeHeaderItems = getGeoAttributeHeaderItems(executionResult, geoData);
+    const locationData = location !== undefined ? attributeHeaderItems[location.index] : [];
 
     return locationData.length > limit;
 }

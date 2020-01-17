@@ -44,7 +44,6 @@ describe("GeoChart", () => {
         renderComponent({
             config: {
                 limit: 20,
-                mdObject,
             },
             onDataTooLarge,
         });

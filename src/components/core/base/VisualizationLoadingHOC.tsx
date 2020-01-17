@@ -14,7 +14,6 @@ import {
     IExportConfig,
     IExportResponse,
     SDK,
-    TypeGuards,
 } from "@gooddata/gooddata-js";
 import { AFM, Execution } from "@gooddata/typings";
 
@@ -35,6 +34,7 @@ import { IPushData, IDrillableItemPushData } from "../../../interfaces/PushData"
 import { IChartConfig } from "../../../interfaces/Config";
 import { setTelemetryHeaders } from "../../../helpers/utils";
 import { fixEmptyHeaderItems } from "./utils/fixEmptyHeaderItems";
+import { isApiExecutionResponseError } from "@gooddata/gooddata-js/lib/typeGuards";
 
 const escapeFileName = (str: string) => str && str.replace(/[\/\?<>\\:\*\|":]/g, "");
 
@@ -330,7 +330,7 @@ export function visualizationLoadingHOC<
         }
 
         private pushDataForError(error: ApiResponseError | ApiExecutionResponseError | Error) {
-            if (TypeGuards.isApiExecutionResponseError(error)) {
+            if (isApiExecutionResponseError(error)) {
                 const supportedDrillableItems = this.getSupportedDrillableItems(error.executionResponse);
                 this.props.pushData({ supportedDrillableItems });
             }

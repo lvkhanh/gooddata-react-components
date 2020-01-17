@@ -1201,7 +1201,7 @@
     firstline "^2.0.2"
     line-replace "^1.0.2"
 
-"@gooddata/gooddata-js@^12.1.0":
+"@gooddata/gooddata-js@12.1.0":
   version "12.1.0"
   resolved "https://registry.yarnpkg.com/@gooddata/gooddata-js/-/gooddata-js-12.1.0.tgz#310984cb4a2c04041468d05adb384e02ef7a7f30"
   integrity sha512-W7jqEU7GNovzvPVzAdkjVqHt7lQTNYI5AK5bexqjWOA+nBIivX0plOULE0/Mmrmv4CUF/VOhBIHGy584WknxDw==
