@@ -3,6 +3,7 @@ import { DEFAULT_COLORS } from "../components/visualizations/utils/color";
 
 export const DEFAULT_DATA_SOURCE_NAME = "gdcPushpinsData";
 export const DEFAULT_LAYER_NAME = "gdcPushpins";
+export const DEFAULT_DATA_POINTS_LIMIT = 2000;
 
 export const DEFAULT_LATITUDE: number = 34;
 export const DEFAULT_LONGITUDE: number = 5;

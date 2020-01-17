@@ -44,12 +44,21 @@ export default class GeoChartRenderer extends React.PureComponent<IGeoChartRende
         this.handleMapEvent();
     }
 
-    public componentDidUpdate() {
-        this.createMap();
+    public componentDidUpdate(prevProps: IGeoChartRendererProps) {
+        const { execution } = this.props;
+        if (execution !== prevProps.execution) {
+            if (prevProps.execution) {
+                this.cleanupMap();
+                this.setupMap();
+            } else {
+                this.removeMap();
+                this.createMap();
+            }
+        }
     }
 
     public componentWillUnmount() {
-        this.chart.remove();
+        this.removeMap();
     }
 
     public setChartRef = (ref: HTMLElement) => {
@@ -97,15 +106,31 @@ export default class GeoChartRenderer extends React.PureComponent<IGeoChartRende
             config: { mdObject: { buckets = [] } = {}, selectedSegmentItem },
         } = this.props;
 
+        // hide city, town, village and hamlet labels
+        if (this.chart.getLayer("settlement-label")) {
+            this.chart.removeLayer("settlement-label");
+        }
+
         const geoData = getGeoData(buckets, executionResponse.dimensions);
         chart.addSource(DEFAULT_DATA_SOURCE_NAME, createPushpinDataSource(executionResult, geoData));
         chart.addLayer(
             createPushpinDataLayer(DEFAULT_DATA_SOURCE_NAME, executionResult, geoData, selectedSegmentItem),
-            "waterway-label", // pushpin will be rendered under state/county label
+            "state-label", // pushpin will be rendered under state/county label
         );
     };
 
     private createTooltip = () => {
         this.tooltip = new mapboxgl.Popup(DEFAULT_TOOLTIP_OPTIONS);
+    };
+
+    private cleanupMap = (): void => {
+        this.chart.removeLayer(DEFAULT_DATA_SOURCE_NAME);
+        this.chart.removeSource(DEFAULT_DATA_SOURCE_NAME);
+    };
+
+    private removeMap = (): void => {
+        if (this.chart) {
+            this.chart.remove();
+        }
     };
 }

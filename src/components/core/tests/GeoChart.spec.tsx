@@ -38,4 +38,16 @@ describe("GeoChart", () => {
         renderComponent({ legendRenderer });
         expect(legendRenderer).toHaveBeenCalledTimes(1);
     });
+
+    it("should call onDataTooLarge", () => {
+        const onDataTooLarge = jest.fn();
+        renderComponent({
+            config: {
+                limit: 20,
+                mdObject,
+            },
+            onDataTooLarge,
+        });
+        expect(onDataTooLarge).toHaveBeenCalledTimes(1);
+    });
 });

@@ -59,3 +59,30 @@ export function getGeoData(
 
     return geoData;
 }
+
+export function getGeoAttributeHeaderItems(
+    executionResult: Execution.IExecutionResult,
+    geoDataIndex: IGeoDataIndex,
+): Execution.IResultHeaderItem[][] {
+    const { color, size } = geoDataIndex;
+
+    const hasColorMeasure = color !== undefined;
+    const hasSizeMeasure = size !== undefined;
+    const attrHeaderItemIndex = hasColorMeasure || hasSizeMeasure ? 1 : 0;
+    const attributeHeaderItems = executionResult.headerItems[attrHeaderItemIndex];
+
+    return attributeHeaderItems;
+}
+
+export function isDataOfReasonableSize(
+    executionResult: Execution.IExecutionResult,
+    geoDataIndex: IGeoDataIndex,
+    limit: number,
+): boolean {
+    const { location } = geoDataIndex;
+
+    const attributeHeaderItems = getGeoAttributeHeaderItems(executionResult, geoDataIndex);
+    const locationData = location !== undefined ? attributeHeaderItems[location] : [];
+
+    return locationData.length > limit;
+}

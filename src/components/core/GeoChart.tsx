@@ -1,6 +1,7 @@
 // (C) 2019-2020 GoodData Corporation
 import * as React from "react";
 import { WrappedComponentProps } from "react-intl";
+import * as invariant from "invariant";
 
 import { ICommonChartProps } from "./base/BaseChart";
 import { BaseVisualization } from "./base/BaseVisualization";
@@ -14,6 +15,9 @@ import GeoChartRenderer, { IGeoChartRendererProps } from "./geoChart/GeoChartRen
 
 import { IDataSourceProviderInjectedProps } from "../afm/DataSourceProvider";
 import { IGeoConfig } from "../../interfaces/GeoChart";
+import { DEFAULT_DATA_POINTS_LIMIT } from "../../constants/geoChart";
+import { IGeoConfig, IGeoDataIndex } from "../../interfaces/GeoChart";
+import { getGeoDataIndex, isDataOfReasonableSize } from "../../helpers/geoChart";
 
 export function renderChart(props: IGeoChartRendererProps): React.ReactElement {
     return <GeoChartRenderer {...props} />;
@@ -44,6 +48,16 @@ export class GeoChartInner extends BaseVisualization<IGeoChartInnerProps, {}> {
         legendRenderer: renderLegend,
     };
 
+    public componentDidUpdate(prevProps: IGeoChartInnerProps) {
+        if (this.props.execution !== prevProps.execution) {
+            this.validateData();
+        }
+    }
+
+    public componentDidMount() {
+        this.validateData();
+    }
+
     public renderVisualization() {
         return (
             <div className="gd-geo-component s-gd-geo-component">
@@ -68,6 +82,31 @@ export class GeoChartInner extends BaseVisualization<IGeoChartInnerProps, {}> {
             domProps: {},
         };
         return legendRenderer(legendProps);
+    };
+
+    private validateData = (): void => {
+        const {
+            config: { limit, mdObject: { buckets = [] } = {} },
+            execution,
+            onDataTooLarge,
+        } = this.props;
+
+        if (!execution) {
+            return;
+        }
+
+        const geoDataIndex: IGeoDataIndex = getGeoDataIndex(buckets);
+        if (
+            isDataOfReasonableSize(
+                execution.executionResult,
+                geoDataIndex,
+                limit || DEFAULT_DATA_POINTS_LIMIT,
+            )
+        ) {
+            // always force onDataTooLarge error handling
+            invariant(onDataTooLarge, "GeoChart's onDataTooLarge callback is missing.");
+            return onDataTooLarge();
+        }
     };
 }
 
