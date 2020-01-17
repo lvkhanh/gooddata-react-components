@@ -142,3 +142,45 @@ export function getHeaderItemName(headerItem: Execution.IResultHeaderItem): stri
     }
     return "";
 }
+
+export function getAttributeHeadersInDimension(
+    dimensions: Execution.IResultDimension[],
+): Array<Execution.IAttributeHeader["attributeHeader"]> {
+    const attributeHeaders: Array<Execution.IAttributeHeader["attributeHeader"]> = [];
+
+    dimensions.forEach((dimension: Execution.IResultDimension) => {
+        dimension.headers.forEach(
+            (wrappedHeader: Execution.IMeasureGroupHeader | Execution.IAttributeHeader) => {
+                const headerType = Object.keys(wrappedHeader)[0];
+                const header = wrappedHeader[headerType];
+
+                if (headerType === "attributeHeader") {
+                    attributeHeaders.push(header);
+                }
+            },
+        );
+    });
+
+    return attributeHeaders;
+}
+
+export function getMeasureGroupHeaderItemsInDimension(
+    dimensions: Execution.IResultDimension[],
+): Execution.IMeasureHeaderItem[] {
+    let measureHeaderItems: Execution.IMeasureHeaderItem[] = [];
+
+    dimensions.forEach((dimension: Execution.IResultDimension) => {
+        dimension.headers.forEach(
+            (wrappedHeader: Execution.IMeasureGroupHeader | Execution.IAttributeHeader) => {
+                const headerType = Object.keys(wrappedHeader)[0];
+                const header = wrappedHeader[headerType];
+
+                if (headerType === "measureGroupHeader") {
+                    measureHeaderItems = [...header.items];
+                }
+            },
+        );
+    });
+
+    return measureHeaderItems;
+}
