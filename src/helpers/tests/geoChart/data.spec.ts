@@ -2,7 +2,7 @@
 import { Execution, VisualizationObject } from "@gooddata/typings";
 import { COLOR_ITEM, LOCATION_ITEM, SEGMENT_BY_ITEM, SIZE_ITEM, TOOLTIP_TEXT_ITEM } from "./fixtures";
 import { getExecutionResponse, getExecutionResult } from "../../../../stories/data/geoChart";
-import { getGeoData } from "../../geoChart/data";
+import { getGeoData, isDefaultZoom, isDefaultCenter, getCenterNumberToFixed } from "../../geoChart/data";
 
 describe("geoChartData", () => {
     it("should return geoData with empty bucket", () => {
@@ -677,5 +677,36 @@ describe("geoChartData", () => {
                 name: "Population",
             },
         });
+    });
+});
+
+describe("financialToFixed", () => {
+    it("should return number to fixed", () => {
+        const newNum = getCenterNumberToFixed({ lat: 12.10843456, lng: 53.57620123 });
+        expect(newNum).toEqual({ lat: 12.10843, lng: 53.5762 });
+    });
+});
+
+describe("isDefaultCenter", () => {
+    it("should return true when value is default", () => {
+        const isDefault = isDefaultCenter({ lat: 34, lng: 5 });
+        expect(isDefault).toEqual(true);
+    });
+
+    it("should return false when value is different default", () => {
+        const isDefault = isDefaultCenter({ lat: 32, lng: 5 });
+        expect(isDefault).toEqual(false);
+    });
+});
+
+describe("isDefaultZoom", () => {
+    it("should return true when value is default", () => {
+        const isDefault = isDefaultZoom(2);
+        expect(isDefault).toEqual(true);
+    });
+
+    it("should return false when value is different default", () => {
+        const isDefault = isDefaultZoom(3);
+        expect(isDefault).toEqual(false);
     });
 });

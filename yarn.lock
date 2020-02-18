@@ -1209,12 +1209,12 @@
     firstline "^2.0.2"
     line-replace "^1.0.2"
 
-"@gooddata/gooddata-js@^12.2.0":
-  version "12.2.0"
-  resolved "https://registry.yarnpkg.com/@gooddata/gooddata-js/-/gooddata-js-12.2.0.tgz#a1f1d951cd2764609494bd86efefa16acc8d0f4f"
-  integrity sha512-vF4aTsXq916zLrdOdzDo+e4CR/09FhAF56HjWyfDGwYlhIldI+gRewoY+jJ6csHpJaGFDBEOOO85u7E5R4NI5w==
+"@gooddata/gooddata-js@12.4.0-alpha-khanh.le-kl-SD-769-saveLoadPushpin-2020-03-08T08-42-19-456Z":
+  version "12.4.0-alpha-khanh.le-kl-SD-769-saveLoadPushpin-2020-03-08T08-42-19-456Z"
+  resolved "https://registry.yarnpkg.com/@gooddata/gooddata-js/-/gooddata-js-12.4.0-alpha-khanh.le-kl-SD-769-saveLoadPushpin-2020-03-08T08-42-19-456Z.tgz#eeccddee801b9770f33af7ea258c89dae50a0e7a"
+  integrity sha512-eN8HageFfdcEb3VQa70B+mrprRKnVByEx3y/ldIVH5oOd67U0JXcEDCNnGf9YUybg8IGBE6EIzLaohepVT4d/g==
   dependencies:
-    "@gooddata/typings" "^2.19.0"
+    "@gooddata/typings" "^2.22.0"
     es6-promise "^3.0.2"
     fetch-cookie "^0.7.0"
     invariant "^2.2.2"
@@ -1312,10 +1312,17 @@
     tslint-microsoft-contrib "6.1.0"
     tslint-react "3.6.0"
 
-"@gooddata/typings@^2.18.0", "@gooddata/typings@^2.19.0":
+"@gooddata/typings@^2.18.0":
   version "2.19.0"
   resolved "https://registry.yarnpkg.com/@gooddata/typings/-/typings-2.19.0.tgz#59f6d825b3671bd17df13bf7020b2b856d94d923"
   integrity sha512-/r66t4g97WlO++dXPl17q5GF09l5LNrqbuPfKDOKtokUE3UiQYpUty/u975SkEg41TF1UlCw40Sikqo+AuanYw==
+  dependencies:
+    lodash "^4.17.11"
+
+"@gooddata/typings@^2.22.0":
+  version "2.22.0"
+  resolved "https://registry.yarnpkg.com/@gooddata/typings/-/typings-2.22.0.tgz#0ae09d7b0c619ca2a6cd101b33ced774a5a1d534"
+  integrity sha512-AD5Cd1tFu7GJ9Px+jDT7QyTm6ofyeKH5zdmOjrm8YWG6fmwTcCEigLvrekHUSCdGceeAlHXpkqFXQXNjzspEtQ==
   dependencies:
     lodash "^4.17.11"
 

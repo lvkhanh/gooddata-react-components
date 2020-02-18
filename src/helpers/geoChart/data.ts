@@ -1,7 +1,7 @@
 // (C) 2020 GoodData Corporation
 import get = require("lodash/get");
 import { Execution, VisualizationObject } from "@gooddata/typings";
-import { IGeoData, IObjectMapping } from "../../interfaces/GeoChart";
+import { IGeoData, IObjectMapping, IGeoLngLatObj } from "../../interfaces/GeoChart";
 import { COLOR, LOCATION, SEGMENT, SIZE, TOOLTIP_TEXT } from "../../constants/bucketNames";
 import {
     getAttributeHeadersInDimension,
@@ -12,6 +12,13 @@ import {
 import { stringToFloat } from "../utils";
 import { getFormatFromExecutionResponse, getGeoAttributeHeaderItems } from "./common";
 import { isDisplayFormUri } from "../../internal/utils/mdObjectHelper";
+import { parseGeoPropertyItem } from "../../components/core/geoChart/geoChartTooltip";
+import {
+    DEFAULT_LONGITUDE,
+    DEFAULT_LATITUDE,
+    DEFAULT_ZOOM,
+    DEFAULT_ROUND_NUM,
+} from "../../constants/geoChart";
 
 interface IBucketItemInfo {
     uri: VisualizationObject.IObjUriQualifier["uri"];
@@ -160,4 +167,55 @@ function getBucketItemInfo(bucketItem: VisualizationObject.BucketItem): IBucketI
     const item = VisualizationObject.isMeasureDefinition(definition) && definition.measureDefinition.item;
     const uri = isDisplayFormUri(item) && item.uri;
     return { uri, localIdentifier };
+}
+
+export function buildTooltipBucketItems(tooltipText: string): VisualizationObject.IBucket {
+    return {
+        localIdentifier: TOOLTIP_TEXT,
+        items: [
+            {
+                visualizationAttribute: {
+                    localIdentifier: TOOLTIP_TEXT,
+                    displayForm: {
+                        uri: tooltipText,
+                    },
+                },
+            },
+        ],
+    };
+}
+
+export const getGeoBucketsFromMdObject = (
+    mdObject: VisualizationObject.IVisualizationObjectContent,
+): VisualizationObject.IBucket[] => {
+    if (!mdObject) {
+        return [];
+    }
+    const { buckets = [], properties } = mdObject;
+    const propertiesObj = parseGeoPropertyItem(properties);
+    const tooltipText = get(propertiesObj, "controls.tooltipText");
+    if (tooltipText) {
+        return [...buckets, buildTooltipBucketItems(tooltipText)];
+    }
+
+    return buckets;
+};
+
+export function isDefaultCenter(center: IGeoLngLatObj): boolean {
+    const { lat, lng } = center;
+    return DEFAULT_LATITUDE === lat && DEFAULT_LONGITUDE === lng;
+}
+
+export function isDefaultZoom(zoom: number): boolean {
+    return zoom === DEFAULT_ZOOM;
+}
+
+export function getCenterNumberToFixed(center: IGeoLngLatObj): IGeoLngLatObj {
+    const { lat, lng } = center;
+    const latCenter = lat.toFixed(DEFAULT_ROUND_NUM);
+    const lngCenter = lng.toFixed(DEFAULT_ROUND_NUM);
+    return {
+        lat: Number(latCenter),
+        lng: Number(lngCenter),
+    };
 }

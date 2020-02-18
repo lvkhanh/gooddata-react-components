@@ -9,6 +9,11 @@ export interface IGeoTooltipItem {
     format?: string;
 }
 
+export interface IGeoLngLatObj {
+    lat: number;
+    lng: number;
+}
+
 export interface IObjectMapping {
     [property: string]: string | number | object | null;
 }

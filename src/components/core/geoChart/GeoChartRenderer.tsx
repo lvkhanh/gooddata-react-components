@@ -31,12 +31,15 @@ import { IGeoConfig, IGeoData } from "../../../interfaces/GeoChart";
 import "../../../../styles/scss/geoChart.scss";
 import { handlePushpinMouseEnter, handlePushpinMouseLeave } from "./geoChartTooltip";
 import { isClusteringAllowed } from "../../../helpers/geoChart/common";
+import { isDefaultZoom, isDefaultCenter, getCenterNumberToFixed } from "../../../helpers/geoChart/data";
 
 export interface IGeoChartRendererProps {
     config: IGeoConfig;
     execution: Execution.IExecutionResponses;
     geoData: IGeoData;
     afterRender(): void;
+    onCenterPositionChanged(data: mapboxgl.EventData): void;
+    onZoomChanged(data: mapboxgl.EventData): void;
 }
 
 export default class GeoChartRenderer extends React.Component<IGeoChartRendererProps> {
@@ -45,6 +48,8 @@ export default class GeoChartRenderer extends React.Component<IGeoChartRendererP
             mapboxToken: "",
         },
         afterRender: noop,
+        onZoomChanged: noop,
+        onCenterPositionChanged: noop,
     };
 
     private chart: mapboxgl.Map;
@@ -57,13 +62,32 @@ export default class GeoChartRenderer extends React.Component<IGeoChartRendererP
         mapboxgl.accessToken = props.config.mapboxToken;
     }
 
+    public shouldComponentUpdate(nextProps: IGeoChartRendererProps) {
+        const {
+            config: { center: nextCenter, zoom: nextZoom },
+        } = nextProps;
+        const { chart } = this;
+
+        if (chart) {
+            const chartCenter = chart.getCenter();
+            const chartZoom = chart.getZoom();
+            return !isEqual(chartCenter, nextCenter) || !isEqual(chartZoom, nextZoom);
+        }
+
+        const {
+            config: { center: currentCenter, zoom: currentZoom },
+        } = this.props;
+
+        return !isEqual(currentCenter, nextCenter) || !isEqual(currentZoom, nextZoom);
+    }
+
     public componentDidUpdate(prevProps: IGeoChartRendererProps) {
         if (!this.props.execution) {
             return;
         }
         const {
             execution: { executionResponse },
-            config: { selectedSegmentItems },
+            config: { selectedSegmentItems = [] },
         } = this.props;
         const {
             execution: { executionResponse: prevExecutionResponse = {} } = {},
@@ -153,6 +177,8 @@ export default class GeoChartRenderer extends React.Component<IGeoChartRendererP
         chart.on("load", this.setupMap);
         chart.on("mouseenter", DEFAULT_LAYER_NAME, handlePushpinMouseEnter(chart, tooltip, separators));
         chart.on("mouseleave", DEFAULT_LAYER_NAME, handlePushpinMouseLeave(chart, tooltip));
+        chart.on("moveend", this.handlePushpinMoveEnd);
+        chart.on("zoomend", this.handlePushpinZoomEnd);
     };
 
     private setupMap = (): void => {
@@ -224,5 +250,38 @@ export default class GeoChartRenderer extends React.Component<IGeoChartRendererP
         if (this.chart) {
             this.chart.remove();
         }
+    };
+
+    private handlePushpinMoveEnd = (e: mapboxgl.EventData): void => {
+        const { target } = e;
+        const {
+            onCenterPositionChanged,
+            config: { tooltipText },
+        } = this.props;
+        const newCenter = getCenterNumberToFixed(target.getCenter());
+        const center = isDefaultCenter(newCenter) ? {} : { center: newCenter };
+        onCenterPositionChanged({
+            properties: {
+                controls: {
+                    ...center,
+                    tooltipText,
+                },
+            },
+        });
+    };
+
+    private handlePushpinZoomEnd = (e: mapboxgl.EventData): void => {
+        const { target } = e;
+        const { onZoomChanged } = this.props;
+        const newZoom: number = target.getZoom();
+        const zoom = isDefaultZoom(newZoom) ? {} : { zoom: newZoom };
+
+        onZoomChanged({
+            properties: {
+                controls: {
+                    ...zoom,
+                },
+            },
+        });
     };
 }

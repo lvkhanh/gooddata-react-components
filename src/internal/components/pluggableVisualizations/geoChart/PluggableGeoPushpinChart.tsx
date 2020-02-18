@@ -35,10 +35,12 @@ import { setGeoPushpinUiConfig } from "../../../utils/uiConfigHelpers/geoPushpin
 import { removeSort, createSorts } from "../../../utils/sort";
 import { getReferencePointWithSupportedProperties } from "../../../utils/propertiesHelper";
 import { VisualizationTypes } from "../../../../constants/visualizationTypes";
-import UnsupportedConfigurationPanel from "../../configurationPanels/UnsupportedConfigurationPanel";
 import { DASHBOARDS_ENVIRONMENT } from "../../../constants/properties";
 import { GeoChart } from "../../../../components/core/GeoChart";
 import { IGeoConfig } from "../../../../interfaces/GeoChart";
+import { GEOPUSHPIN_SUPPORTED_PROPERTIES } from "../../../constants/supportedProperties";
+import GeoPushpinConfigurationPanel from "../../configurationPanels/GeoPushpinConfigurationPanel";
+import noop = require("lodash/noop");
 
 export class PluggableGeoPushpinChart extends PluggableBaseChart {
     private geoPushpinElement: string;
@@ -48,7 +50,7 @@ export class PluggableGeoPushpinChart extends PluggableBaseChart {
 
         const { callbacks, element, visualizationProperties } = props;
         this.type = VisualizationTypes.PUSHPIN;
-        this.supportedPropertiesList = [];
+        this.supportedPropertiesList = GEOPUSHPIN_SUPPORTED_PROPERTIES;
         this.callbacks = callbacks;
         this.geoPushpinElement = element;
         this.initializeProperties(visualizationProperties);
@@ -63,6 +65,7 @@ export class PluggableGeoPushpinChart extends PluggableBaseChart {
                     this.intl,
                     this.type,
                 );
+                newReferencePoint = this.updateSupportedProperties(newReferencePoint);
                 newReferencePoint = getReferencePointWithSupportedProperties(
                     newReferencePoint,
                     this.supportedPropertiesList,
@@ -75,6 +78,24 @@ export class PluggableGeoPushpinChart extends PluggableBaseChart {
     public getUiConfig(): IUiConfig {
         return cloneDeep(GEO_PUSHPIN_CHART_UICONFIG);
     }
+
+    protected handlePushData = (data: any) => {
+        const pushData = get(this.callbacks, "pushData", noop) as any;
+        const resultingData = data;
+        const { controls = {} } = this.visualizationProperties;
+        const { properties: { controls: newControlProp = {} } = {} } = data;
+        const properties = {
+            controls: {
+                ...controls,
+                ...newControlProp,
+            },
+        };
+        pushData({
+            ...resultingData,
+            properties,
+            references: this.references,
+        });
+    };
 
     protected configureBuckets(extendedReferencePoint: IExtendedReferencePoint): IExtendedReferencePoint {
         const buckets: IBucket[] = get(extendedReferencePoint, BUCKETS, []);
@@ -126,7 +147,7 @@ export class PluggableGeoPushpinChart extends PluggableBaseChart {
             const properties: IVisualizationProperties = get(this, "visualizationProperties.properties", {});
 
             render(
-                <UnsupportedConfigurationPanel
+                <GeoPushpinConfigurationPanel
                     locale={this.locale}
                     pushData={this.callbacks.pushData}
                     properties={properties}
@@ -164,10 +185,10 @@ export class PluggableGeoPushpinChart extends PluggableBaseChart {
 
         // keep height undef for AD; causes indigo-visualizations to pick default 100%
         const resultingHeight = this.environment === DASHBOARDS_ENVIRONMENT ? height : undefined;
-
         const resultSpec = this.getResultSpec(options, visualizationProperties, mdObject);
-
-        const fullConfig = this.buildVisualizationConfig(mdObject, config, null);
+        const supportedControls: IVisualizationProperties = get(visualizationProperties, "controls", {});
+        const configSupportedControls = !isEmpty(supportedControls) && supportedControls;
+        const fullConfig = this.buildVisualizationConfig(mdObject, config, configSupportedControls);
 
         const geoPushpinProps = {
             projectId,
@@ -179,6 +200,8 @@ export class PluggableGeoPushpinChart extends PluggableBaseChart {
             dataSource,
             resultSpec,
             pushData: this.handlePushData,
+            onCenterPositionChanged: this.handlePushData,
+            onZoomChanged: this.handlePushData,
             afterRender,
             onDrill,
             onError,
@@ -250,5 +273,24 @@ export class PluggableGeoPushpinChart extends PluggableBaseChart {
     private getPreferedBucketItemLimit(preferredBucket: string): number {
         const { buckets: bucketsUiConfig } = this.getUiConfig();
         return bucketsUiConfig[preferredBucket].itemsLimit;
+    }
+
+    private updateSupportedProperties(referencePoint: IExtendedReferencePoint): IExtendedReferencePoint {
+        const buckets: IBucket[] = get(referencePoint, BUCKETS, []);
+        const locationItem = this.getLocationItems(buckets)[0];
+        if (!locationItem) {
+            return referencePoint;
+        }
+        const referencePointConfigured = cloneDeep(referencePoint);
+        const { dfUri } = locationItem;
+        const visualizationProperties = this.visualizationProperties || {};
+        const { controls = {} } = visualizationProperties;
+        set(referencePointConfigured, "properties", {
+            controls: {
+                ...controls,
+                tooltipText: dfUri,
+            },
+        });
+        return referencePointConfigured;
     }
 }

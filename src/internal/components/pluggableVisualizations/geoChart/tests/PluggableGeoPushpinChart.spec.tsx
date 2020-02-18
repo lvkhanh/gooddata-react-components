@@ -1,9 +1,11 @@
 // (C) 2019-2020 GoodData Corporation
 import noop = require("lodash/noop");
+import get = require("lodash/get");
 import * as referencePointMocks from "../../../../mocks/referencePointMocks";
 import * as uiConfigMocks from "../../../../mocks/uiConfigMocks";
 import { PluggableGeoPushpinChart } from "../PluggableGeoPushpinChart";
 import { IExtendedReferencePoint, IVisConstruct } from "../../../../interfaces/Visualization";
+import { GEOPUSHPIN_SUPPORTED_PROPERTIES } from "../../../../constants/supportedProperties";
 
 describe("PluggableGeoPushpinChart", () => {
     const defaultProps: IVisConstruct = {
@@ -136,6 +138,15 @@ describe("PluggableGeoPushpinChart", () => {
                     items: [],
                 },
             ]);
+        });
+
+        it("should return a new reference point with geoPushpin supported properties list", async () => {
+            const geoPushpinChart = createComponent();
+
+            await geoPushpinChart.getExtendedReferencePoint(
+                referencePointMocks.simpleGeoPushpinReferencePoint,
+            );
+            expect(get(geoPushpinChart, "supportedPropertiesList")).toEqual(GEOPUSHPIN_SUPPORTED_PROPERTIES);
         });
     });
 });

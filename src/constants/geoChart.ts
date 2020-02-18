@@ -56,6 +56,7 @@ export const DEFAULT_LAYER_NAME = "gdcPushpins";
 export const DEFAULT_LATITUDE: number = 34;
 export const DEFAULT_LONGITUDE: number = 5;
 export const DEFAULT_ZOOM: number = 2;
+export const DEFAULT_ROUND_NUM: number = 5;
 
 export const DEFAULT_PUSHPIN_BORDER_COLOR_VALUE = "rgb(233,237,241)";
 

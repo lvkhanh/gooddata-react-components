@@ -47,6 +47,8 @@ export interface ICommonVisualizationProps extends IEvents {
     drillableItems?: Array<IDrillableItem | IHeaderPredicate>;
     afterRender?: () => void;
     pushData?: (data: IPushData) => void;
+    onCenterPositionChanged?: (data: mapboxgl.EventData) => void;
+    onZoomChanged?: (data: mapboxgl.EventData) => void;
     ErrorComponent?: React.ComponentType<IErrorProps>;
     LoadingComponent?: React.ComponentType<ILoadingProps>;
     config?: IChartConfig;

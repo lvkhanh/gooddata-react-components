@@ -168,6 +168,7 @@ export interface IBucketItem {
     overTimeComparisonType?: OverTimeComparisonType;
     operandLocalIdentifiers?: Array<string | null> | null;
     operator?: string | null;
+    dfUri?: string;
 }
 
 export interface IFiltersBucketItem extends IBucketItem {
